@@ -7,6 +7,7 @@ import Logger from "../Logger";
 import type { HuntType } from "../lib/models/Hunts";
 import MeteorUsers from "../lib/models/MeteorUsers";
 import Settings from "../lib/models/Settings";
+import { addUserToRole } from "../lib/permission_stubs";
 import addUsersToDiscordRole from "./addUsersToDiscordRole";
 import { ensureHuntFolderPermission } from "./gdrive";
 import List from "./List";
@@ -112,6 +113,7 @@ export default async function addUserToHunt({
   await MeteorUsers.updateAsync(joineeUser._id, {
     $addToSet: { hunts: { $each: [hunt._id] } },
   });
+  await addUserToRole(joineeUser._id, hunt._id, "operator");
   const joineeEmails = (joineeUser.emails ?? []).map((e) => e.address);
 
   hunt.mailingLists.forEach((listName) => {
