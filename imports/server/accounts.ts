@@ -105,10 +105,24 @@ Accounts.registerLoginHandler(async (options: LoginOptions) => {
     ).fetchAsync();
     switch (users.length) {
       case 0: {
-        // Autoprovision a new user
-        const userId = await Accounts.createUserAsync({
-          email,
-        });
+        // Check if a user already exists with this email (e.g., created via
+        // email/password signup before trying Google OAuth)
+        const existingMatchingUsers = await MeteorUsers.find(
+          { "emails.address": email },
+          { limit: 1 },
+        ).fetchAsync();
+
+        let userId: string;
+        if (existingMatchingUsers.length > 0) {
+          // Link Google account to existing user
+          userId = existingMatchingUsers[0]!._id;
+        } else {
+          // Autoprovision a new user
+          userId = await Accounts.createUserAsync({
+            email,
+          });
+        }
+
         await MeteorUsers.updateAsync(userId, {
           $set: {
             googleAccount: email,
