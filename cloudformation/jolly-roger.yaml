@@ -217,6 +217,7 @@ Resources:
     Condition: HaveServing
     Properties:
       ServiceToken: !GetAtt SshUsersParsingFunction.Arn
+      SshUsers: !Ref SshUsers
       Suite: jammy
       Region: !Ref "AWS::Region"
       InstanceType: ebs-ssd
