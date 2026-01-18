@@ -4,6 +4,17 @@ const exitHandlers: (() => void | Promise<void>)[] = [];
 
 ["SIGINT" as const, "SIGTERM" as const, "SIGHUP" as const].forEach((signal) => {
   process.once(signal, () => {
+    // Log signal receipt for debugging unexpected shutdowns
+    const timestamp = new Date().toISOString();
+    const stack = new Error().stack;
+    console.warn(`[${timestamp}] Received ${signal} - initiating shutdown`);
+    console.warn(
+      `[${timestamp}] Process info: pid=${process.pid}, ppid=${process.ppid}, uptime=${process.uptime().toFixed(0)}s`,
+    );
+    console.warn(
+      `[${timestamp}] Memory: ${JSON.stringify(process.memoryUsage())}`,
+    );
+    console.warn(`[${timestamp}] Stack trace:\n${stack}`);
     (async () => {
       for (const handler of exitHandlers.splice(0)) {
         try {
